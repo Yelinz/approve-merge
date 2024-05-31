@@ -1,13 +1,16 @@
 // ==UserScript==
 // @name        Approve and Merge
-// @namespace   Violentmonkey Scripts
+// @namespace   Yelinz
 // @match       https://github.com/*
 // @grant       GM_addElement
 // @grant       GM_getValue
 // @grant       GM_setValue
-// @version     1.0
+// @version     0.1.0
 // @author      Yelinz
-// @description 5/28/2024, 4:57:03 PM
+// @description Approve and Merge Dependabot Pull Requests on GitHub with one click.
+// @downloadURL https://raw.githubusercontent.com/Yelinz/approve-merge/main/approve-merge.user.js
+// @supportURL https://github.com/Yelinz/approve-merge
+// @homepageURL https://github.com/Yelinz/approve-merge
 // ==/UserScript==
 
 function waitForElement(selector) {
