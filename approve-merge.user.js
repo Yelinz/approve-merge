@@ -1,17 +1,22 @@
 // ==UserScript==
 // @name        Approve and Merge
 // @namespace   Yelinz
+// @description Approve and Merge Dependabot Pull Requests on GitHub with one click.
+// @author      Yelinz
+// @downloadURL https://raw.githubusercontent.com/Yelinz/approve-merge/main/approve-merge.user.js
+// @supportURL  https://github.com/Yelinz/approve-merge/issues
+// @homepageURL https://github.com/Yelinz/approve-merge
+
 // @match       https://github.com/*
+
 // @grant       GM_addElement
 // @grant       GM_getValue
 // @grant       GM_setValue
-// @version     0.1.0
-// @author      Yelinz
-// @description Approve and Merge Dependabot Pull Requests on GitHub with one click.
-// @downloadURL https://raw.githubusercontent.com/Yelinz/approve-merge/main/approve-merge.user.js
-// @supportURL https://github.com/Yelinz/approve-merge
-// @homepageURL https://github.com/Yelinz/approve-merge
+
+// @version     0.1.1
 // ==/UserScript==
+
+const ALLOWED_USERS = new Set(["dependabot"])
 
 function waitForElement(selector) {
   return new Promise((resolve) => {
@@ -34,13 +39,16 @@ function waitForElement(selector) {
   });
 }
 
+const HEADER_SELECTOR = ".js-pull-header-details"
+const READY_BADGE_SELECTOR = '[reviewable_state="ready"]'
+const AUTHOR_SELECTOR = ".author"
 function createButton() {
-  waitForElement(".js-pull-header-details").then((element) => {
-    const badge = document.querySelector('[reviewable_state="ready"]');
-    const author = document.querySelector(".author");
+  waitForElement(HEADER_SELECTOR).then((element) => {
+    const badge = document.querySelector(READY_BADGE_SELECTOR);
+    const author = document.querySelector(AUTHOR_SELECTOR);
 
     // ignore non ready and non dependabot PRs
-    if (!badge || author.textContent !== "dependabot") {
+    if (!badge || !ALLOWED_USERS.has(author.textContent)) {
       return;
     }
 
@@ -54,24 +62,25 @@ function createButton() {
   });
 }
 
+const REVIEW_SELECTOR = ".js-reviews-toggle"
+const REVIEW_APPROVE_SELECTOR = "#pull_request_review\\[event\\]_approve"
+const REVIEW_SUBMIT_SELECTOR = "#pull_requests_submit_review .Button--primary"
 function approve() {
-  const reviewOpen = document.querySelector(".js-reviews-toggle");
+  const reviewOpen = document.querySelector(REVIEW_SELECTOR);
   reviewOpen.click();
-  const reviewOption = document.querySelector(
-    "#pull_request_review\\[event\\]_approve",
-  );
+  const reviewOption = document.querySelector(REVIEW_APPROVE_SELECTOR);
   reviewOption.click();
-  const reviewSubmit = document.querySelector(
-    "#pull_requests_submit_review .Button--primary",
-  );
+  const reviewSubmit = document.querySelector(REVIEW_SUBMIT_SELECTOR);
   GM_setValue("step", 2);
   reviewSubmit.click();
 }
 
+const MERGE_BOX_SELECTOR = '.merge-box-button:not([disabled=""])'
+const MERGE_BUTTON_SELECTOR = ".js-merge-commit-button"
 function merge() {
-  waitForElement('.merge-box-button:not([disabled=""])').then((element) => {
+  waitForElement(MERGE_BOX_SELECTOR).then((element) => {
     element.click();
-    const mergeConfirm = document.querySelector(".js-merge-commit-button");
+    const mergeConfirm = document.querySelector(MERGE_BUTTON_SELECTOR);
     mergeConfirm.click();
     GM_setValue("step", 0);
     window.location.replace(location.pathname.split("pull")[0] + "pulls");
